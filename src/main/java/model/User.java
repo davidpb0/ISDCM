@@ -96,20 +96,25 @@ public class User {
     }
     
     //Save user to DB
-    public void saveUser() {
-        try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
-            String query = "INSERT INTO users (nickname, username, surnames, email, password) VALUES (?, ?, ?, ?, ?)";
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, this.nickname);
-                statement.setString(2, this.username);
-                statement.setString(3, this.surnames);
-                statement.setString(4, this.email);
-                statement.setString(5, this.password);
-                statement.executeUpdate();
+    public boolean saveUser() {
+        if (!this.checkUserExistance()){
+            try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
+                String query = "INSERT INTO users (nickname, username, surnames, email, password) VALUES (?, ?, ?, ?, ?)";
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    statement.setString(1, this.nickname);
+                    statement.setString(2, this.username);
+                    statement.setString(3, this.surnames);
+                    statement.setString(4, this.email);
+                    statement.setString(5, this.password);
+                    statement.executeUpdate();
+                    return true;
+                }
+            } catch (SQLException e) {
+                System.out.println(e);
+                return false;
             }
-        } catch (SQLException e) {
-            System.out.println(e);
         }
+        return false;
     }
     
     public static User getUserByNickname(String nickname) {
@@ -136,6 +141,26 @@ public class User {
     return user;
 }
     
+public boolean checkUserExistance() {
+    try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
+        String query = "SELECT * FROM users WHERE email = ? OR username = ?";
+        try (PreparedStatement checkStatement = connection.prepareStatement(query)) {
+            checkStatement.setString(1, this.email);
+            checkStatement.setString(2, this.username);
+            try (ResultSet resultSet = checkStatement.executeQuery()) {
+                    return resultSet.next(); 
+            }
+            catch (SQLException e) {
+                return true;
+            }
+        }
+        
+    } catch (SQLException e) {
+        System.out.println(e);
+    }
+        return true;
+}
+    
 public static User getUserByEmail(String email) {
     User user = null;
     try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
@@ -159,6 +184,23 @@ public static User getUserByEmail(String email) {
     }
     return user;
 }
+
+ public static boolean authenticateUser(String usernameOrEmail, String password) {        
+        String query = "SELECT * FROM users WHERE (nickname = ? OR email = ?) AND password = ?";
+        
+        try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2");
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, usernameOrEmail);
+            statement.setString(2, usernameOrEmail);
+            statement.setString(3, password);
+            
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            return false; 
+        }
+    }
 
 
     

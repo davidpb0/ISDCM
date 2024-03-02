@@ -1,7 +1,7 @@
 <%-- 
-    Document   : register
-    Created on : 25 feb 2024, 19:26:54
-    Author     : davidpb0
+    Document   : login
+    Created on : 2 mar 2024, 19:24:48
+    Author     : alumne
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -9,7 +9,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>User Registration</title>
+    <title>User Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -23,17 +23,6 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .error-container {
-            max-width: 400px;
-            margin: 0px auto 0px auto;
-            padding: 10px;
-            background-color: #FFA98F;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            font-family: fantasy;
-            font-weight: 700; 
-              
-        }
         h1 {
             text-align: center;
         }
@@ -43,7 +32,6 @@
             font-weight: bold;
         }
         input[type="text"],
-        input[type="email"],
         input[type="password"] {
             width: 100%;
             padding: 10px;
@@ -65,24 +53,44 @@
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
+        .error-container {
+            max-width: 400px;
+            margin: 0px auto 0px auto;
+            padding: 10px;
+            background-color: #FFA98F;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-family: fantasy;
+            font-weight: 700; 
+              
+        }
+        .link-container {
+            max-width: 400px;
+            margin: 0px auto 0px auto;
+            padding: 10px;
+            font-family: fantasy;
+            font-weight: 700; 
+              
+        }
+        .register-link {
+            display: inline-block;
+            padding: 10px;
+            color: blue;
+            cursor: pointer;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>User Registration</h1>
+        <h1>User Login</h1>
         <form action="UserController" method="post">
-            <label for="nickname">Nickname:</label>
-            <input type="text" id="nickname" name="nickname" required><br>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required><br>
-            <label for="surnames">Surnames:</label>
-            <input type="text" id="surnames" name="surnames"><br>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required><br>
+            <label for="nicknameOrEmail">Nickname or Email:</label>
+            <input type="text" id="nicknameOrEmail" name="nicknameOrEmail" required><br>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br>
-            <input type="hidden" name="action" value="registerUser">
-            <input type="submit" value="Register">
+            <input type="hidden" name="action" value="loginUser">
+            <input type="submit" value="Sign In">
         </form>
     </div>
     <% 
@@ -98,5 +106,15 @@
         sessionObj.removeAttribute("errorMessage");
         %>
     <% } %>
+    <div>
+        <form action="register.jsp" method="get">
+            <div class="link-container">
+                <span>Don't have an account yet?</span>
+                <a href="register.jsp" class="register-link">Register here</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>
+
+

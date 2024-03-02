@@ -12,10 +12,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
- * @author alumne
+ * @author davidpb0
  */
 @WebServlet(name = "UserController", urlPatterns = {"/UserController"})
 public class UserController extends HttpServlet {
@@ -59,10 +60,22 @@ public class UserController extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
         
-        if ("registerUser".equals(action)) {
-            registerUser(request, response);
-        } else {
+        if (null == action) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action: " + action);
+        }
+        else switch (action) {
+            case "registerUser":
+                registerUser(request, response);
+                break;
+            case "loginUser":
+                loginUser(request, response);
+                break;
+            case "logoutUser":
+                logoutUser(request, response);
+                break;
+            default:
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action: " + action);
+                break;
         }
     }
 
@@ -77,9 +90,41 @@ public class UserController extends HttpServlet {
         
         User user = new User(nickname, username, surnames, email, password);
         
-        user.saveUser();
+        if (user.saveUser()){
+            response.sendRedirect("home.jsp");
+        }
+        else {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "The user with that username or email already exists");
+            response.sendRedirect("register.jsp");
+        }
         
-        response.sendRedirect("home.jsp");
+    }
+    
+    private void loginUser(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String nicknameOrEmail = request.getParameter("nicknameOrEmail");
+        String password = request.getParameter("password");
+        
+        if (User.authenticateUser(nicknameOrEmail, password)) {
+            HttpSession session = request.getSession(true);
+            session.setAttribute("user", nicknameOrEmail);
+            response.sendRedirect("home.jsp");
+        } else {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Invalid username/email or password");
+            response.sendRedirect("login.jsp");
+        }
+    }
+    
+    private void logoutUser(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        
+        if (session != null) {
+            session.invalidate();
+        }
+        response.sendRedirect("login.jsp");
     }
 
 
