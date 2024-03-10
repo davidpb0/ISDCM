@@ -143,10 +143,10 @@ public class User {
     
 public boolean checkUserExistance() {
     try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
-        String query = "SELECT * FROM users WHERE email = ? OR username = ?";
+        String query = "SELECT * FROM users WHERE email = ? OR nickname = ?";
         try (PreparedStatement checkStatement = connection.prepareStatement(query)) {
             checkStatement.setString(1, this.email);
-            checkStatement.setString(2, this.username);
+            checkStatement.setString(2, this.nickname);
             try (ResultSet resultSet = checkStatement.executeQuery()) {
                     return resultSet.next(); 
             }

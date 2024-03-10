@@ -65,11 +65,26 @@
             background-color: #45a049;
         }
 
-        .error-message {
-            color: red;
-            font-size: 12px;
-            margin-top: -10px;
-            margin-bottom: 10px;
+        .error-container {
+            max-width: 400px;
+            margin: 0px auto 10px auto;
+            padding: 10px;
+            background-color: #FFA98F;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-family: fantasy;
+            font-weight: 700; 
+              
+        }
+        .back-button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #18314F;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
     </style>
     <script>
@@ -105,6 +120,9 @@
                 formatInput.value = format;
                 formatInputHidden.value = format;
             }
+        }
+        function goBack() {
+            window.history.back();
         }
 
 
@@ -146,6 +164,7 @@
         %>
 
         <input type="submit" value="Upload">
+        <button class="back-button" onclick="goBack()">Go Back</button>
     </form>
 </body>
 </html>

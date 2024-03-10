@@ -106,7 +106,6 @@
                     <input type="hidden" name="action" value="logoutUser">
                     <button class="logout-button" type="submit">Logout</button>
          </form>
-        <!-- Add any additional toolbar content here -->
     </div>
 
     <div class="container">

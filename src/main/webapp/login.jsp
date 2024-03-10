@@ -14,6 +14,9 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
+            display: flex;
+            flex-direction: row; /* Stack flex items vertically */
+            height: 100vh;
         }
         .container {
             max-width: 400px;
@@ -27,7 +30,6 @@
             text-align: center;
         }
         label {
-            display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
@@ -79,40 +81,85 @@
             cursor: pointer;
             text-decoration: none;
         }
+         .left-side {
+            flex: 2;
+            background-color: #fff;
+            padding: 20px;
+        }
+        .right-side {
+            flex: 1;
+            background-color: #18314F;
+            padding: 20px;
+            color: #fff;
+        }
+        .right-container {
+            margin: 50px auto 15px auto;
+            padding: 20px;
+        }
+        .register-button {
+            display: block;
+            width: 200px; /* Set the width of the button */
+            margin: 0 auto; /* Center the button horizontally */
+            padding: 15px; /* Increase padding for larger size */
+            background-color: #4da6ff; /* Lighter blue color */
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 18px; /* Increase font size */
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .register-button:hover {
+            background-color: #3385ff;
+        }
+        
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>User Login</h1>
-        <form action="UserController" method="post">
-            <label for="nickname">Nickname:</label>
-            <input type="text" id="nickname" name="nickname" required><br>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required><br>
-            <input type="hidden" name="action" value="loginUser">
-            <input type="submit" value="Sign In">
-        </form>
-    </div>
-    <% 
-    HttpSession sessionObj = request.getSession();
-    String errorMessage = (String) sessionObj.getAttribute("errorMessage");
-    System.out.println(errorMessage);
-    if (errorMessage != null) { 
-    %>
-        <div class="error-container">
-            <%= errorMessage %>
+    <div class="left-side">
+        <div class="container">
+            <h1>Sign In</h1>
+            <form action="UserController" method="post">
+                <label for="nickname">Username:</label>
+                <input type="text" id="nickname" name="nickname" required><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required><br>
+                <input type="hidden" name="action" value="loginUser">
+                <input type="submit" value="Sign In">
+            </form>
         </div>
         <% 
-        sessionObj.removeAttribute("errorMessage");
+        HttpSession sessionObj = request.getSession();
+        String errorMessage = (String) sessionObj.getAttribute("errorMessage");
+        System.out.println(errorMessage);
+        if (errorMessage != null) { 
         %>
-    <% } %>
-    <div>
-        <form action="register.jsp" method="get">
-            <div class="link-container">
-                <span>Don't have an account yet?</span>
-                <a href="register.jsp" class="register-link">Register here</a>
+            <div class="error-container">
+                <%= errorMessage %>
             </div>
-        </form>
+            <% 
+            sessionObj.removeAttribute("errorMessage");
+            %>
+        <% } %>
+        <div>
+            <form action="register.jsp" method="get">
+                <div class="link-container">
+                    <span>Don't have an account yet?</span>
+                    <a href="register.jsp" class="register-link">Register here</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="right-side">
+        <div class="right-container">
+            <h1>New here?</h1>
+            <p>Signup and discover a new world of opportunities</p>
+            <form action="register.jsp" method="get">
+                <button type="submit" class="register-button">Sign Up</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

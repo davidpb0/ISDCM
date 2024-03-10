@@ -71,20 +71,42 @@
     <div class="container">
         <h1>User Registration</h1>
         <form action="UserController" method="post">
-            <label for="nickname">Nickname:</label>
+            <label for="nickname">Username:</label>
             <input type="text" id="nickname" name="nickname" required><br>
-            <label for="username">Username:</label>
+            
+            <label for="username">Name:</label>
             <input type="text" id="username" name="username" required><br>
+            
             <label for="surnames">Surnames:</label>
             <input type="text" id="surnames" name="surnames"><br>
+            
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required><br>
+            
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br>
+            
+            <label for="repeatPassword">Repeat Password:</label>
+            <input type="password" id="repeatPassword" name="repeatPassword" required><br>
+            
             <input type="hidden" name="action" value="registerUser">
             <input type="submit" value="Register">
         </form>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var form = document.querySelector('form');
+            var passwordInput = document.getElementById('password');
+            var repeatPasswordInput = document.getElementById('repeatPassword');
+
+            form.addEventListener('submit', function(event) {
+                if (passwordInput.value !== repeatPasswordInput.value) {
+                    alert('Passwords do not match');
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
     <% 
     HttpSession sessionObj = request.getSession();
     String errorMessage = (String) sessionObj.getAttribute("errorMessage");

@@ -100,7 +100,7 @@ public class serverletRegistroVid extends HttpServlet {
             try (InputStream fileContent = filePart.getInputStream()) {
                 Files.copy(fileContent, Paths.get(filePath));
             } catch (IOException e) {
-                session.setAttribute("errorMessage", "Error saving video!");
+                session.setAttribute("errorMessage", "The video with that title already exist!");
                 // Redirect back to the registration page
                 response.sendRedirect("registroVid.jsp");
                 System.out.println(e);
@@ -116,7 +116,7 @@ public class serverletRegistroVid extends HttpServlet {
                 response.sendRedirect("home.jsp");
             } else {
                 // Set error message attribute in session
-                session.setAttribute("errorMessage", "Error saving video!");
+                session.setAttribute("errorMessage", "The video with that title already exist!");
                 // Redirect back to the registration page
                 response.sendRedirect("registroVid.jsp");
             }
