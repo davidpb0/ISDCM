@@ -5,6 +5,13 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%
+    // Check if user is logged in
+    String user = (String) session.getAttribute("user");
+    if (user == null) {
+        response.sendRedirect("login.jsp"); 
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,18 +32,19 @@
 
         .sidebar {
             width: 150px;
-            background-color: #1e2852; /* Dark blue */
+            background-color: #1e2852;
             color: #fff;
             padding: 10px;
+            z-index: 100;
         }
 
         .main-content {
             margin-top: 85px;
             flex: 1;
             padding: 20px;
-            background-color: #fff; /* White */
-            color: #000; /* Black text */
-            position: relative; /* Add position relative */
+            background-color: #fff; 
+            color: #000; 
+            position: relative;
         }
 
         .toolbar {
@@ -44,7 +52,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 10px 25px;
-            background-color: #1e2852; /* Dark blue */
+            background-color: #1e2852;
             color: #fff;
             position: fixed;
             width: 100%;
@@ -59,7 +67,7 @@
             padding: 10px 20px;
             margin-bottom: 10px;
             text-align: left;
-            background-color: #44506a; /* Darker blue */
+            background-color: #44506a;
             color: #fff;
             border: none;
             cursor: pointer;
@@ -67,15 +75,15 @@
         }
 
         .menu-button:hover {
-            background-color: #1e2852; /* Dark blue */
+            background-color: #1e2852;
         }
 
         .content {
-            margin-top: 200px; /* Adjust based on toolbar height */
+            margin-top: 200px;
         }
 
         .sidebar ul {
-            margin-top: 150px; /* Add more space between toolbar and ul */
+            margin-top: 150px;
             padding: 0;
             list-style: none;
         }
@@ -101,7 +109,7 @@
 </head>
 <body>
     <div class="toolbar">
-        <h1>FIBTube</h1>
+        <h1 style="z-index: 10000;">FIBTube</h1>
         <form action="UserController" method="post">
                     <input type="hidden" name="action" value="logoutUser">
                     <button class="logout-button" type="submit">Logout</button>
@@ -117,10 +125,9 @@
         </div>
 
         <div class="main-content">
-            <!-- Main content goes here -->
-            <h1>Welcome back <%= session.getAttribute("user") %></h1>
-            <%-- Display success message if available --%>
-            <% String successMessage = (String) session.getAttribute("successMessage");
+            <h1>Welcome back <%= session.getAttribute("user") %> !</h1>
+            
+            <% String successMessage = (String)request.getAttribute("successMessage");
                if (successMessage != null && !successMessage.isEmpty()) { %>
                 <div class="success-message">
                     <%= successMessage %>
@@ -129,7 +136,7 @@
                     // Hide the success message after 5 seconds
                     setTimeout(function() {
                         document.querySelector('.success-message').style.display = 'none';
-                    }, 5000); // 5000 milliseconds = 5 seconds
+                    }, 5000);
                 </script>
             <% } %>
             <jsp:include page="listadoVid.jsp" />

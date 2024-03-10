@@ -1,3 +1,9 @@
+<%-- 
+    Document   : listadoVid
+    Created on : 03 feb 2024, 19:26:54
+    Author     : davidpb0
+--%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
 <%@ page import="java.io.File" %>
@@ -6,6 +12,13 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="model.Video" %>
 <%@ page import="java.util.AbstractMap.SimpleEntry" %>
+<%
+    // Check if user is logged in
+    String user = (String) session.getAttribute("user");
+    if (user == null) {
+        response.sendRedirect("login.jsp"); 
+    }
+%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,82 +26,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Videos Page</title>
-    
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <style>
+        .swiper-container {
+            width: 500px;
+            margin: 0 auto; 
+        }
+
+        .swiper-slide {
+            text-align: center;
+            font-size: 18px;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-container {
+            max-width: 100%;
+            height: auto;
+        }
+
+    </style>
 </head>
 <body>
-    <!-- Form to trigger the POST request -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <form id="fetchVideosForm" action="servletListadoVid" method="post">
-        <!-- You can include any form fields or data you need here -->
-        <!-- For example, you can include hidden input fields with additional data -->
-
-        <!-- Submit button to submit the form -->
         <input type="hidden" name="action" value="fetchVideos">
         <button type="submit">Fetch Videos</button>
     </form>
-    <%
-         Map<String, SimpleEntry<Video, File>> videoFileMap = (Map<String, SimpleEntry<Video, File>>) request.getAttribute("videoMap");
-         if (videoFileMap != null) {
-            for (Map.Entry<String, SimpleEntry<Video, File>> entry : videoFileMap.entrySet()) {
-                SimpleEntry<Video, File> videoEntry = entry.getValue();
-                Video videoMetadata = videoEntry.getKey();
-                File videoFile = videoEntry.getValue();
-                try {
-                    // Read the video file as bytes
-                    byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
-                    // Convert the video bytes to Base64 encoded string
-                    String base64Video = Base64.getEncoder().encodeToString(videoBytes);
-    %>
-                    <div style="margin: 10px; margin-top: 20px;">
-                        <h3 style="margin: 0px;"><%= videoMetadata.getTitle() %></h3>
-                        <p style="margin: 0px;"><%= videoMetadata.getDescription() %></p>
-                        <video id="<%= videoFile.getName() %>" width="320" height="200" controls>
-                            <source src="data:video/mp4;base64, <%= base64Video %>" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                        <div style="font-size: 12px; display: flex; align-items: center;">
-                            <p style="margin: 0; margin-right: 180px;">Uploaded by <%= videoMetadata.getAuthor() %></p>
-                            <p style="margin: 0;"><%= videoMetadata.getReproductions() %> views</p>
+
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+            <% 
+            Map<String, SimpleEntry<Video, File>> videoFileMap = (Map<String, SimpleEntry<Video, File>>) request.getAttribute("videoMap");
+            if (videoFileMap != null && !videoFileMap.isEmpty()) {
+                for (Map.Entry<String, SimpleEntry<Video, File>> entry : videoFileMap.entrySet()) {
+                    SimpleEntry<Video, File> videoEntry = entry.getValue();
+                    Video videoMetadata = videoEntry.getKey();
+                    File videoFile = videoEntry.getValue();
+                    try {
+                        byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
+                        String base64Video = Base64.getEncoder().encodeToString(videoBytes);
+            %>
+                        <div class="swiper-slide">
+                            <div style="margin: 10px;">
+                                <h3 style="margin: 0;"><%= videoMetadata.getTitle() %></h3>
+                                <p style="margin: 0;"><%= videoMetadata.getDescription() %></p>
+                                <video id ="<%= videoFile.getName() %>" class="video-container" controls>
+                                    <source src="data:video/<%= videoMetadata.getFormat() %>;base64, <%= base64Video %>" type="video/<%= videoMetadata.getFormat() %>">
+                                    Your browser does not support the video tag.
+                                </video>
+                                <div style="font-size: 12px; display: flex; align-items: center;">
+                                    <p style="margin: 0; margin-right: 330px;">Uploaded by <%= videoMetadata.getAuthor() %></p>
+                                    <p style="margin: 0;"><%= videoMetadata.getReproductions() %> views</p>
+                                </div>
+                            </div>
+                             <script>
+                                var videoElement = document.getElementById("<%= videoFile.getName() %>");
+
+                                videoElement.addEventListener('play', function() {
+                                    event.preventDefault();
+                                    var form = new FormData(); 
+                                    form.append('action', 'addVisualization');
+
+                                    form.append('title', '<%= videoMetadata.getTitle() %>');
+                                    form.append('author', '<%= videoMetadata.getAuthor() %>');
+
+                                    fetch('servletListadoVid?action=addVisualization&title=<%= videoMetadata.getTitle() %>&author=<%= videoMetadata.getAuthor() %>', {
+                                        method: 'POST',
+                                        body: form
+                                    })
+                                    .then(response => {
+                                        console.log('Form submitted successfully');
+                                    })
+                                    .catch(error => {
+                                        console.error('Error submitting form:', error);
+                                    });
+
+                                });
+                            </script>
                         </div>
-                    </div>
-                    <script>
-                        // JavaScript code to track video play events
-                        var videoElement = document.getElementById("<%= videoFile.getName() %>");
                         
-                        videoElement.addEventListener('play', function() {
-                            event.preventDefault();
-                            // Create a hidden form element and submit it
-                            var form = new FormData(); // Create a FormData object
-                            form.append('action', 'addVisualization'); // Add the 'action' parameter
-
-                            // Add other form fields
-                            form.append('title', '<%= videoMetadata.getTitle() %>');
-                            form.append('author', '<%= videoMetadata.getAuthor() %>');
-
-                            // Submit the form asynchronously using fetch API
-                            fetch('servletListadoVid?action=addVisualization&title=<%= videoMetadata.getTitle() %>&author=<%= videoMetadata.getAuthor() %>', {
-                                method: 'POST',
-                                body: form
-                            })
-                            .then(response => {
-                                // Handle the response as needed
-                                console.log('Form submitted successfully');
-                            })
-                            .catch(error => {
-                                // Handle any errors
-                                console.error('Error submitting form:', error);
-                            });
-                            
-                        });
-                    </script>
-    <%
-                } catch (Exception e) {
-                    e.printStackTrace();
+            <% 
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
+            } else {
+            %>
+                <p style="margin-top: 100px">There are no videos yet</p>
+            <%
             }
-        }
-    %>
- 
-</body>
-</html>
+            %>
+        </div>
+        <div class="swiper-pagination"></div>
+        
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+
+    <script>
+        // Initialization of Swiper after DOM ready
+        document.addEventListener('DOMContentLoaded', function () {
+            var swiper = new Swiper('.swiper-container', {
+                loop: true,
+                spaceBetween: 100,
+                slidesPerView: '1',
+
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+            });
+        });
+        
+    </script>
 </body>
 </html>

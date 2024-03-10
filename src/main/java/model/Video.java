@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  *
- * @author alumne
+ * @author davidpb0
  */
 public class Video {
     private String title;

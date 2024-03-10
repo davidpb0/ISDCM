@@ -1,7 +1,7 @@
 <%-- 
     Document   : login
     Created on : 2 mar 2024, 19:24:48
-    Author     : alumne
+    Author     : davidpb0
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -15,7 +15,7 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             display: flex;
-            flex-direction: row; /* Stack flex items vertically */
+            flex-direction: row;
             height: 100vh;
         }
         .container {
@@ -98,15 +98,15 @@
         }
         .register-button {
             display: block;
-            width: 200px; /* Set the width of the button */
-            margin: 0 auto; /* Center the button horizontally */
-            padding: 15px; /* Increase padding for larger size */
-            background-color: #4da6ff; /* Lighter blue color */
+            width: 200px; 
+            margin: 0 auto;
+            padding: 15px; 
+            background-color: #4da6ff;
             border: none;
             border-radius: 10px;
             color: #fff;
             cursor: pointer;
-            font-size: 18px; /* Increase font size */
+            font-size: 18px;
             text-align: center;
             text-decoration: none;
         }
@@ -143,14 +143,6 @@
             sessionObj.removeAttribute("errorMessage");
             %>
         <% } %>
-        <div>
-            <form action="register.jsp" method="get">
-                <div class="link-container">
-                    <span>Don't have an account yet?</span>
-                    <a href="register.jsp" class="register-link">Register here</a>
-                </div>
-            </form>
-        </div>
     </div>
     <div class="right-side">
         <div class="right-container">

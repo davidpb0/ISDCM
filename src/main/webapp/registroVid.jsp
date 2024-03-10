@@ -1,10 +1,18 @@
 <%-- 
-    Document   : newjsf
-    Created on : 5 mar 2024, 18:27:11
-    Author     : alumne
+    Document   : registroVid
+    Created on : 03 feb 2024, 19:26:54
+    Author     : davidpb0
 --%>
 
+
 <%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    // Check if user is logged in
+    String user = (String) session.getAttribute("user");
+    if (user == null) {
+        response.sendRedirect("login.jsp"); 
+    }
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -122,7 +130,7 @@
             }
         }
         function goBack() {
-            window.history.back();
+             window.location.href = 'home.jsp';
         }
 
 
@@ -132,7 +140,7 @@
     <h1>Upload Video</h1>
     <form action="serverletRegistroVid" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
         <label for="file">Choose video file:</label>
-        <input type="file" id="file" name="file" onchange="updateAuthorAndFormat()">
+        <input type="file" id="file" name="file" accept="video/*" onchange="updateAuthorAndFormat()">
         <div id="file-error-message" class="error-message"></div>
 
         <label for="title">Title:</label>
@@ -140,6 +148,10 @@
 
         <label for="description">Description:</label>
         <input type="text" id="description" name="description"></textarea>
+        
+        <label for="duration">Duration (hh:mm:ss):</label>
+        <input type="text" id="duration" name="duration" pattern="[0-9]{2}:[0-5][0-9]:[0-5][0-9]" placeholder="HH:MM:SS">
+
 
         <label for="author">Author:</label>
         <input type="text" id="author" name="author" readonly>
@@ -151,16 +163,16 @@
 
         
         <% 
-        HttpSession sessionObj = request.getSession();
-        String errorMessage = (String) sessionObj.getAttribute("errorMessage");
-        if (errorMessage != null) { 
+            HttpSession sessionObj = request.getSession();
+            String errorMessage = (String) sessionObj.getAttribute("errorMessage");
+            if (errorMessage != null) { 
         %>
             <div class="error-container">
                 <%= errorMessage %>
             </div>
-            <% 
-            sessionObj.removeAttribute("errorMessage");
-        }
+        <% 
+                sessionObj.removeAttribute("errorMessage");
+            }
         %>
 
         <input type="submit" value="Upload">

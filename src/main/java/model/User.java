@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  *
- * @author alumne
+ * @author davidpb0
  */
 public class User {
     private String nickname;
@@ -200,10 +200,5 @@ public static User getUserByEmail(String email) {
             return false; 
         }
     }
-
-
-    
-    
-    
     
 }
