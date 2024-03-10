@@ -3,11 +3,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package model;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,36 +21,43 @@ import java.util.List;
  * @author alumne
  */
 public class Video {
-    private int id;  // Assuming id is a numeric type in the database
     private String title;
-    private String autor;
+    private String author;
     private String creationDate;
-    private String durations;
-    private int reproductions;  // Assuming reproductions is a numeric type in the database
+    private String duration;
+    private int reproductions;
     private String description;
     private String format;
+    private String path;
 
     // Constructor
-    public Video(int id, String title, String autor, String creationDate, String durations, int reproductions, String description, String format) {
-        this.id = id;
+    public Video(String title, String author, String duration, String description, String format, String path) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime currentDateTime = LocalDateTime.now();
         this.title = title;
-        this.autor = autor;
-        this.creationDate = creationDate;
-        this.durations = durations;
+        this.author = author;
+        this.creationDate = currentDateTime.format(formatter);
+        this.duration = duration;
+        this.reproductions = 0;
+        this.description = description;
+        this.format = format;
+        this.path = path;
+    }
+    public Video(String title, String author, String duration, String description, String format, String path, int reproductions) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        this.title = title;
+        this.author = author;
+        this.creationDate = currentDateTime.format(formatter);
+        this.duration = duration;
         this.reproductions = reproductions;
         this.description = description;
         this.format = format;
+        this.path = path;
     }
+
 
     // Getters & Setters
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -54,12 +66,12 @@ public class Video {
         this.title = title;
     }
 
-    public String getAutor() {
-        return autor;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setAutor(String autor) {
-        this.autor = autor;
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
     public String getCreationDate() {
@@ -70,12 +82,12 @@ public class Video {
         this.creationDate = creationDate;
     }
 
-    public String getDurations() {
-        return durations;
+    public String getDuration() {
+        return duration;
     }
 
-    public void setDurations(String durations) {
-        this.durations = durations;
+    public void setDuration(String duration) {
+        this.duration = duration;
     }
 
     public int getReproductions() {
@@ -97,11 +109,59 @@ public class Video {
     public String getFormat() {
         return format;
     }
+    
+    public String getFilePath() {
+        return path;
+    }
 
     public void setFormat(String format) {
         this.format = format;
     }
-
+    
+    public static List<byte[]> getAllVideosFromFolder(String folderPath) {
+        List<byte[]> videoBinaries = new ArrayList<>();
+        File folder = new File(folderPath);
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                try {
+                    byte[] videoBytes = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+                    videoBinaries.add(videoBytes);
+                } catch (Exception e) {
+                    System.out.println("Error reading video file: " + e.getMessage());
+                }
+            }
+        }
+        return videoBinaries;
+    }
+    
+    public static Video getVideoByTitleAndAuthor(String title, String author) {
+        Video video = null;
+        try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
+            String query = "SELECT * FROM videos WHERE title = ? AND author = ?";
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, title);
+                statement.setString(2, author);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        video = new Video(
+                                resultSet.getString("title"),
+                                resultSet.getString("author"),
+                                resultSet.getString("duration"),
+                                resultSet.getString("description"),
+                                resultSet.getString("format"),
+                                resultSet.getString("videoPath")
+                        );
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return video;
+    }
+    
+     
     // Get all videos in DB
     public static List<Video> getAllVideos() {
         List<Video> videoList = new ArrayList<>();
@@ -110,14 +170,14 @@ public class Video {
             try (PreparedStatement statement = connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Video video = new Video(
-                            resultSet.getInt("id"),
                             resultSet.getString("title"),
-                            resultSet.getString("autor"),
-                            resultSet.getString("creationDate"),
-                            resultSet.getString("durations"),
-                            resultSet.getInt("reproduction"),
+                            resultSet.getString("author"),
+                            resultSet.getString("duration"),
                             resultSet.getString("description" ),
-                            resultSet.getString("format")
+                            resultSet.getString("format"),
+                            resultSet.getString("videoPath"),
+                            resultSet.getInt("reproductions")
+                            
                     );
                     videoList.add(video);
                 }
@@ -132,16 +192,16 @@ public class Video {
     public boolean saveVideo() {
         if (!this.checkVideoExistance()){
             try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
-                String query = "INSERT INTO videos (id, title, autor, creationDate, durations, reproduction, description, format) VALUES (?, ?, ?, ?, ?)";
+                String query = "INSERT INTO videos (title, author, creationDate, duration, reproductions, description, format, videoPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement statement = connection.prepareStatement(query)) {
-                    statement.setInt(1, this.id);
-                    statement.setString(2, this.title);
-                    statement.setString(3, this.autor);
-                    statement.setString(4, this.creationDate);
-                    statement.setString(5, this.durations);
-                    statement.setInt(6, this.reproductions);
-                    statement.setString(7, this.description);
-                    statement.setString(8, this.format);
+                    statement.setString(1, this.title);
+                    statement.setString(2, this.author);
+                    statement.setString(3, this.creationDate);
+                    statement.setString(4, this.duration);
+                    statement.setInt(5, this.reproductions);
+                    statement.setString(6, this.description);
+                    statement.setString(7, this.format);
+                    statement.setString(8, this.path);
                     statement.executeUpdate();
                     return true;
                 }
@@ -154,38 +214,56 @@ public class Video {
     }
     
     public static Video getVideoByTitle(String title) {
-    Video video = null;
-    try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
-        String query = "SELECT * FROM videos WHERE title = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, title);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    video = new Video(
-                            resultSet.getInt("id"),
-                            resultSet.getString("title"),
-                            resultSet.getString("autor"),
-                            resultSet.getString("creationDate"),
-                            resultSet.getString("durations"),
-                            resultSet.getInt("reproduction"),
-                            resultSet.getString("description" ),
-                            resultSet.getString("format")
-                    );
+        Video video = null;
+        try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
+            String query = "SELECT * FROM videos WHERE title = ?";
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, title);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        video = new Video(
+                                resultSet.getString("title"),
+                                resultSet.getString("author"),
+                                resultSet.getString("duration"),
+                                resultSet.getString("description" ),
+                                resultSet.getString("format"),
+                                resultSet.getString("videoPath")
+                        );
+                    }
                 }
             }
+        } catch (SQLException e) {
+            System.out.println(e);
         }
-    } catch (SQLException e) {
-        System.out.println(e);
+        return video;
     }
-    return video;
-}
+    
+    public static void updateReproductions(String title, String author) {
+        try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
+            String query = "UPDATE videos SET reproductions = reproductions + 1 WHERE title = ? AND author = ?";
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, title);
+                statement.setString(2, author);
+
+                
+                int rowsAffected = statement.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("Reproductions updated successfully for video with title: " + title);
+                } else {
+                    System.out.println("Failed to update reproductions for video with title: " + title);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
     
 public boolean checkVideoExistance() {
     try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
-        String query = "SELECT * FROM video WHERE id = ? OR title = ?";
+        String query = "SELECT * FROM videos WHERE title = ? AND author = ?";
         try (PreparedStatement checkStatement = connection.prepareStatement(query)) {
-            checkStatement.setInt(1, this.id);
-            checkStatement.setString(2, this.title);
+            checkStatement.setString(1, this.title);
+            checkStatement.setString(2, this.author);
             try (ResultSet resultSet = checkStatement.executeQuery()) {
                     return resultSet.next(); 
             }
@@ -200,23 +278,21 @@ public boolean checkVideoExistance() {
         return true;
 }
     
-public static Video getVideoByAutor(String autor) {
+public static Video getVideoByAuthor(String author) {
     Video video = null;
     try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
-        String query = "SELECT * FROM videos WHERE autor = ?";
+        String query = "SELECT * FROM videos WHERE author = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, autor);
+            statement.setString(1, author);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     video = new Video(
-                            resultSet.getInt("id"),
                             resultSet.getString("title"),
-                            resultSet.getString("autor"),
-                            resultSet.getString("creationDate"),
-                            resultSet.getString("durations"),
-                            resultSet.getInt("reproduction"),
+                            resultSet.getString("author"),
+                            resultSet.getString("duration"),
                             resultSet.getString("description" ),
-                            resultSet.getString("format")
+                            resultSet.getString("format"),
+                            resultSet.getString("videoPath")
                     );
                 }
             }

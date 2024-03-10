@@ -85,8 +85,8 @@
     <div class="container">
         <h1>User Login</h1>
         <form action="UserController" method="post">
-            <label for="nicknameOrEmail">Nickname or Email:</label>
-            <input type="text" id="nicknameOrEmail" name="nicknameOrEmail" required><br>
+            <label for="nickname">Nickname:</label>
+            <input type="text" id="nickname" name="nickname" required><br>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br>
             <input type="hidden" name="action" value="loginUser">

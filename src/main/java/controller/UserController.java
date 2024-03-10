@@ -103,16 +103,16 @@ public class UserController extends HttpServlet {
     
     private void loginUser(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String nicknameOrEmail = request.getParameter("nicknameOrEmail");
+        String nickname = request.getParameter("nickname");
         String password = request.getParameter("password");
         
-        if (User.authenticateUser(nicknameOrEmail, password)) {
+        if (User.authenticateUser(nickname, password)) {
             HttpSession session = request.getSession(true);
-            session.setAttribute("user", nicknameOrEmail);
+            session.setAttribute("user", nickname);
             response.sendRedirect("home.jsp");
         } else {
             HttpSession session = request.getSession();
-            session.setAttribute("errorMessage", "Invalid username/email or password");
+            session.setAttribute("errorMessage", "Invalid nickname or password");
             response.sendRedirect("login.jsp");
         }
     }

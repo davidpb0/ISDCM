@@ -185,14 +185,13 @@ public static User getUserByEmail(String email) {
     return user;
 }
 
- public static boolean authenticateUser(String usernameOrEmail, String password) {        
-        String query = "SELECT * FROM users WHERE (nickname = ? OR email = ?) AND password = ?";
+ public static boolean authenticateUser(String nickname, String password) {        
+        String query = "SELECT * FROM users WHERE nickname = ? AND password = ?";
         
         try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2");
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, usernameOrEmail);
-            statement.setString(2, usernameOrEmail);
-            statement.setString(3, password);
+            statement.setString(1, nickname);
+            statement.setString(2, password);
             
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next();
