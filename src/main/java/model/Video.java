@@ -21,6 +21,7 @@ import java.util.List;
  * @author davidpb0
  */
 public class Video {
+    private int id;
     private String title;
     private String author;
     private String creationDate;
@@ -54,6 +55,20 @@ public class Video {
         this.description = description;
         this.format = format;
         this.path = path;
+    }
+    
+    public Video(String title, String author, String duration, String description, String format, String path, int reproductions, int id) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        this.title = title;
+        this.author = author;
+        this.creationDate = currentDateTime.format(formatter);
+        this.duration = duration;
+        this.reproductions = reproductions;
+        this.description = description;
+        this.format = format;
+        this.path = path;
+        this.id = id;
     }
 
 
@@ -112,6 +127,10 @@ public class Video {
     
     public String getFilePath() {
         return path;
+    }
+    
+    public int getId() {
+        return id;
     }
 
     public void setFormat(String format) {
