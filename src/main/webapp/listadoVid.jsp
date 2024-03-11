@@ -21,7 +21,7 @@
 %>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -136,13 +136,13 @@
 
                 pagination: {
                     el: '.swiper-pagination',
-                    clickable: true,
+                    clickable: true
                 },
 
                 navigation: {
                     nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                },
+                    prevEl: '.swiper-button-prev'
+                }
             });
         });
         

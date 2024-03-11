@@ -110,14 +110,12 @@
         }
 
         function updateAuthorAndFormat() {
-            // Get the username from the session
             var authorInput = document.getElementById('author');
             var authorInputHidden = document.getElementById('authorHidden');
             var sessionUsername = '<%= session.getAttribute("user") %>';
             authorInput.value = sessionUsername;
             authorInputHidden.value = sessionUsername;
 
-            // Get the selected file and extract its extension
             var fileInput = document.getElementById('file');
             var formatInput = document.getElementById('format');
             var formatInputHidden = document.getElementById('formatHidden');
