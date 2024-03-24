@@ -22,14 +22,11 @@ import model.Video;
  */
 @WebServlet(urlPatterns = {"/servletListadoVid"})
 public class servletListadoVid extends HttpServlet {
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        response.sendRedirect("login.jsp");
 
     }
 
@@ -60,9 +57,9 @@ public class servletListadoVid extends HttpServlet {
             case "fetchVideos":
                 fetchVideos(request, response);
                 break;
-            case "addVisualization":
-                addVisualization(request, response);
-                break;
+//            case "addVisualization":
+//                addVisualization(request, response);
+//                break;
             default:
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action: " + action);
                 break;
@@ -103,22 +100,18 @@ public class servletListadoVid extends HttpServlet {
         }
     }
 
-    private void addVisualization(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        if (session != null && session.getAttribute("user") != null) {
-            String title = request.getParameter("title");
-            String author = request.getParameter("author");
-            Video.updateReproductions(title, author);
-            request.getRequestDispatcher("home.jsp").forward(request, response);
-        } else {
-            response.sendRedirect("login.jsp");
-        }
+//    private void addVisualization(HttpServletRequest request, HttpServletResponse response)
+//            throws ServletException, IOException {
+//        HttpSession session = request.getSession(false);
+//        if (session != null && session.getAttribute("user") != null) {
+//            String title = request.getParameter("title");
+//            String author = request.getParameter("author");
+//            Video.updateReproductions(title, author);
+//            request.getRequestDispatcher("home.jsp").forward(request, response);
+//        } else {
+//            response.sendRedirect("login.jsp");
+//        }
+//
+//    }
 
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Servlet to retrieve and display videos";
-    }
 }

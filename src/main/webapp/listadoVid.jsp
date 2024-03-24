@@ -93,7 +93,7 @@
                                     form.append('title', '<%= videoMetadata.getTitle() %>');
                                     form.append('author', '<%= videoMetadata.getAuthor() %>');
 
-                                    fetch('servletListadoVid?action=addVisualization&title=<%= videoMetadata.getTitle() %>&author=<%= videoMetadata.getAuthor() %>', {
+                                    fetch('servletREST?action=addVisualization&title=<%= videoMetadata.getTitle() %>&author=<%= videoMetadata.getAuthor() %>', {
                                         method: 'POST',
                                         body: form
                                     })
