@@ -120,6 +120,7 @@
         <div class="sidebar">
             <ul>
                 <button class="menu-button" onclick="navigateToRegisterVideo()">Register Video</button>
+                <button class="menu-button" onclick="navigateToFilterVideo()">Search Video</button>
                 
             </ul>
         </div>
@@ -146,6 +147,9 @@
     <script>
         function navigateToRegisterVideo() {
             window.location.href = 'registroVid.jsp';
+        }
+        function navigateToFilterVideo() {
+            window.location.href = 'filterVid.jsp';
         }
     </script>
 </body>

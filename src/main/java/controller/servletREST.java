@@ -4,6 +4,9 @@
  */
 package controller;
 
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -12,9 +15,20 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import model.Video;
 
 /**
  *
@@ -62,6 +76,9 @@ public class servletREST extends HttpServlet {
             case "addVisualization":
                 addVisualization(request, response);
                 break;
+            case "fetchFilterVideos":
+                fetchFilterVideos(request, response);
+                break;
             default:
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action: " + action);
                 break;
@@ -104,6 +121,115 @@ public class servletREST extends HttpServlet {
             response.sendRedirect("login.jsp");
         }
     }
+     
+     private List<File> getAllVideoFiles(String folderPath) {
+        List<File> videoFiles = new ArrayList<>();
+        File folder = new File(folderPath);
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    videoFiles.add(file);
+                }
+            }
+        }
+        return videoFiles;
+    }
+    private void fetchFilterVideos(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            System.out.println("Entro");
+            Map<String, AbstractMap.SimpleEntry<Video, File>> videoMap = new HashMap<>();
+            
+            String videosFolderPath = "/home/alumne/WebAppVideos";
+            
+            String searchEndpoint = "http://localhost:8080/ISDCMRest/resources/jakartaee9/searchVideo"; // Change this to your actual endpoint
+            
+            String filter = request.getParameter("filter");
+            String value = request.getParameter("value");
+            
+            String requestBody = "{\"filter\": \"" + filter + "\", \"value\": \"" + value + "\"}";
+            
+            // Send POST request to searchVideo endpoint
+            URL url = new URL(searchEndpoint);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+            
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = requestBody.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            // Check if the response is successful (status code 2xx)
+            int responseCode = conn.getResponseCode();
+            System.out.println(responseCode);
+            if (responseCode >= 200 && responseCode < 300) {
+                // Read response
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder responseBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBuilder.append(line);
+                }
+                reader.close();
+
+                List<Video> videoMetadataList = new ArrayList<>();
+                
+                String jsonResponse = responseBuilder.toString();
+                
+                JsonArray jsonArray = Json.createReader(new StringReader(jsonResponse)).readArray();
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    JsonObject jsonObject = jsonArray.getJsonObject(i);
+                    Video video = new Video(
+                                jsonObject.getString("title"),
+                                jsonObject.getString("author"),
+                                jsonObject.getString("duration"),
+                                jsonObject.getString("description"),
+                                jsonObject.getString("format"),
+                                jsonObject.getString("path"),
+                                jsonObject.getInt("reproductions"),
+                                jsonObject.getInt("id"),
+                                jsonObject.getString("creationDate")
+                        );
+                    
+                    videoMetadataList.add(video);
+                }
+                
+                List<File> fileVideos = getAllVideoFiles(videosFolderPath);
+
+                
+
+                if (videoMetadataList != null && fileVideos != null){
+                    
+                    for (Video videoMetadata : videoMetadataList) {
+                        String key = videoMetadata.getTitle() + "_" + videoMetadata.getAuthor();
+                        AbstractMap.SimpleEntry<Video, File> entry = new AbstractMap.SimpleEntry<>(videoMetadata, null);
+                        videoMap.put(key, entry);
+                    }
+
+                    for (File file : fileVideos) {
+                        String fileName = file.getName();
+                        String titleAuthor = fileName.substring(0, fileName.lastIndexOf('.'));
+                        AbstractMap.SimpleEntry<Video, File> entry = videoMap.get(titleAuthor);
+                        if (entry != null) {
+                            entry.setValue(file);
+                        }
+                    }
+                }
+                request.setAttribute("videoMap", videoMap);
+            } else {
+                // Handle error response
+                System.out.println("Error in rest request");
+            }
+            request.getRequestDispatcher("filterVid.jsp").forward(request, response);
+        } else {
+            response.sendRedirect("login.jsp");
+        }
+    }
+    
 
 
 }

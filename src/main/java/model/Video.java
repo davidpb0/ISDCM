@@ -71,6 +71,18 @@ public class Video {
         this.id = id;
     }
 
+    public Video(String title, String author, String duration, String description, String format, String path, int reproductions, int id, String creationDate) {
+        this.title = title;
+        this.author = author;
+        this.duration = duration;
+        this.reproductions = reproductions;
+        this.description = description;
+        this.format = format;
+        this.path = path;
+        this.id = id;
+        this.creationDate = creationDate;
+    }
+
 
     // Getters & Setters
     public String getTitle() {
