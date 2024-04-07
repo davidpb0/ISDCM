@@ -57,9 +57,6 @@ public class servletListadoVid extends HttpServlet {
             case "fetchVideos":
                 fetchVideos(request, response);
                 break;
-//            case "addVisualization":
-//                addVisualization(request, response);
-//                break;
             default:
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action: " + action);
                 break;
@@ -99,19 +96,5 @@ public class servletListadoVid extends HttpServlet {
             response.sendRedirect("login.jsp");
         }
     }
-
-//    private void addVisualization(HttpServletRequest request, HttpServletResponse response)
-//            throws ServletException, IOException {
-//        HttpSession session = request.getSession(false);
-//        if (session != null && session.getAttribute("user") != null) {
-//            String title = request.getParameter("title");
-//            String author = request.getParameter("author");
-//            Video.updateReproductions(title, author);
-//            request.getRequestDispatcher("home.jsp").forward(request, response);
-//        } else {
-//            response.sendRedirect("login.jsp");
-//        }
-//
-//    }
 
 }

@@ -1,14 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,7 +15,6 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.util.AbstractMap;
@@ -32,13 +26,11 @@ import model.Video;
 
 /**
  *
- * @author alumne
+ * @author davidpb0
  */
 @WebServlet(name = "servletREST", urlPatterns = {"/servletREST"})
 public class servletREST extends HttpServlet {
 
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -61,8 +53,7 @@ public class servletREST extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    
-    
+   
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -92,7 +83,7 @@ public class servletREST extends HttpServlet {
             String title = request.getParameter("title");
             String author = request.getParameter("author");
 
-            // Make an HTTP POST request to the REST endpoint
+            // Make an HTTP PUT request to the REST endpoint
             URL url = new URL("http://localhost:8080/ISDCMRest/resources/jakartaee9/updateReproductions");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("PUT");
@@ -102,7 +93,6 @@ public class servletREST extends HttpServlet {
             // Construct JSON payload
             String jsonInputString = "{\"title\": \"" + title + "\", \"author\": \"" + author + "\"}";
 
-            // Send JSON payload
             try (OutputStream os = conn.getOutputStream()) {
                 byte[] input = jsonInputString.getBytes("utf-8");
                 os.write(input, 0, input.length);
@@ -137,21 +127,21 @@ public class servletREST extends HttpServlet {
     }
     private void fetchFilterVideos(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("user") != null) {
-            System.out.println("Entro");
+            
             Map<String, AbstractMap.SimpleEntry<Video, File>> videoMap = new HashMap<>();
             
             String videosFolderPath = "/home/alumne/WebAppVideos";
             
-            String searchEndpoint = "http://localhost:8080/ISDCMRest/resources/jakartaee9/searchVideo"; // Change this to your actual endpoint
-            
+            String searchEndpoint = "http://localhost:8080/ISDCMRest/resources/jakartaee9/searchVideo"; 
             String filter = request.getParameter("filter");
             String value = request.getParameter("value");
             
             String requestBody = "{\"filter\": \"" + filter + "\", \"value\": \"" + value + "\"}";
             
-            // Send POST request to searchVideo endpoint
+            // Send POST request to endpoint
             URL url = new URL(searchEndpoint);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -163,11 +153,11 @@ public class servletREST extends HttpServlet {
                 os.write(input, 0, input.length);
             }
 
-            // Check if the response is successful (status code 2xx)
+            // Check if the response is successful
             int responseCode = conn.getResponseCode();
             System.out.println(responseCode);
             if (responseCode >= 200 && responseCode < 300) {
-                // Read response
+
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 StringBuilder responseBuilder = new StringBuilder();
                 String line;
@@ -200,8 +190,6 @@ public class servletREST extends HttpServlet {
                 
                 List<File> fileVideos = getAllVideoFiles(videosFolderPath);
 
-                
-
                 if (videoMetadataList != null && fileVideos != null){
                     
                     for (Video videoMetadata : videoMetadataList) {
@@ -229,7 +217,4 @@ public class servletREST extends HttpServlet {
             response.sendRedirect("login.jsp");
         }
     }
-    
-
-
 }

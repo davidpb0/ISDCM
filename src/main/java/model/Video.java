@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 import java.io.File;
 import java.nio.file.Files;
@@ -268,72 +264,50 @@ public class Video {
         }
         return video;
     }
-    
-    public static void updateReproductions(String title, String author) {
+        
+    public boolean checkVideoExistance() {
         try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
-            String query = "UPDATE videos SET reproductions = reproductions + 1 WHERE title = ? AND author = ?";
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, title);
-                statement.setString(2, author);
+            String query = "SELECT * FROM videos WHERE title = ? AND author = ?";
+            try (PreparedStatement checkStatement = connection.prepareStatement(query)) {
+                checkStatement.setString(1, this.title);
+                checkStatement.setString(2, this.author);
+                try (ResultSet resultSet = checkStatement.executeQuery()) {
+                        return resultSet.next(); 
+                }
+                catch (SQLException e) {
+                    return true;
+                }
+            }
 
-                
-                int rowsAffected = statement.executeUpdate();
-                if (rowsAffected > 0) {
-                    System.out.println("Reproductions updated successfully for video with title: " + title);
-                } else {
-                    System.out.println("Failed to update reproductions for video with title: " + title);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+            return true;
+    }
+
+    public static Video getVideoByAuthor(String author) {
+        Video video = null;
+        try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
+            String query = "SELECT * FROM videos WHERE author = ?";
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, author);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        video = new Video(
+                                resultSet.getString("title"),
+                                resultSet.getString("author"),
+                                resultSet.getString("duration"),
+                                resultSet.getString("description" ),
+                                resultSet.getString("format"),
+                                resultSet.getString("videoPath")
+                        );
+                    }
                 }
             }
         } catch (SQLException e) {
             System.out.println(e);
         }
-    }
-    
-public boolean checkVideoExistance() {
-    try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
-        String query = "SELECT * FROM videos WHERE title = ? AND author = ?";
-        try (PreparedStatement checkStatement = connection.prepareStatement(query)) {
-            checkStatement.setString(1, this.title);
-            checkStatement.setString(2, this.author);
-            try (ResultSet resultSet = checkStatement.executeQuery()) {
-                    return resultSet.next(); 
-            }
-            catch (SQLException e) {
-                return true;
-            }
-        }
-        
-    } catch (SQLException e) {
-        System.out.println(e);
-    }
-        return true;
-}
-    
-public static Video getVideoByAuthor(String author) {
-    Video video = null;
-    try (Connection connection = DriverManager.getConnection("jdbc:derby://localhost:1527/pr2", "pr2", "pr2")) {
-        String query = "SELECT * FROM videos WHERE author = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, author);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    video = new Video(
-                            resultSet.getString("title"),
-                            resultSet.getString("author"),
-                            resultSet.getString("duration"),
-                            resultSet.getString("description" ),
-                            resultSet.getString("format"),
-                            resultSet.getString("videoPath")
-                    );
-                }
-            }
-        }
-    } catch (SQLException e) {
-        System.out.println(e);
-    }
-    return video;
-}   
-    
-    
-    
+        return video;
+    }   
+       
 }
