@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import model.Video;
@@ -71,23 +72,32 @@ public class servletListadoVid extends HttpServlet {
             List<Video> videoMetadataList = Video.getAllVideos();
             List<File> fileVideos = getAllVideoFiles(videosFolderPath);
 
-            Map<String, AbstractMap.SimpleEntry<Video, File>> videoMap = new HashMap<>();
+            Map<String, AbstractMap.SimpleEntry<Video, String>> videoMap = new HashMap<>();
+            String secretKey = "5Uo7r8YfGhJk2NmP";
 
             if (videoMetadataList != null && fileVideos != null){
                 
                 for (Video videoMetadata : videoMetadataList) {
                     String key = videoMetadata.getTitle() + "_" + videoMetadata.getAuthor();
-                    AbstractMap.SimpleEntry<Video, File> entry = new AbstractMap.SimpleEntry<>(videoMetadata, null);
+                    AbstractMap.SimpleEntry<Video, String> entry = new AbstractMap.SimpleEntry<>(videoMetadata, null);
                     videoMap.put(key, entry);
                 }
 
                 for (File file : fileVideos) {
                     String fileName = file.getName();
                     String titleAuthor = fileName.substring(0, fileName.lastIndexOf('.'));
-                    AbstractMap.SimpleEntry<Video, File> entry = videoMap.get(titleAuthor);
-                    if (entry != null) {
-                        entry.setValue(file);
-                    }
+                    
+                    try {
+                        byte[] decryptedBytes = VideoEncryptionUtil.decryptVideo(videosFolderPath + "/" + fileName, secretKey);
+                        String base64Video = Base64.getEncoder().encodeToString(decryptedBytes);
+                        AbstractMap.SimpleEntry<Video, String> entry = videoMap.get(titleAuthor);
+                        if (entry != null) {
+                            entry.setValue(base64Video);
+                        }
+                    }catch (Exception e) {
+                        System.err.println("Failed to decrypt video: " + e.getMessage());
+                    }                    
+
                 }
             }
             request.setAttribute("videoMap", videoMap);

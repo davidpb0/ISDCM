@@ -4,6 +4,7 @@
  */
 package controller;
 
+import jakarta.json.Json;
 import model.User;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,6 +14,18 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import model.Video;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import java.io.StringReader;
+import java.net.URLEncoder;
 
 /**
  *
@@ -95,8 +108,51 @@ public class UserController extends HttpServlet {
         if (User.authenticateUser(nickname, password)) {
             HttpSession session = request.getSession(true);
             session.setAttribute("user", nickname);
-            response.sendRedirect("home.jsp");
-        } else {
+            
+            // Make an HTTP PUT request to the REST endpoint
+            URL url = new URL("http://localhost:8080/ISDCMRest/resources/jakartaee9/login");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); // Change content type
+            conn.setDoOutput(true);
+
+            // Construct form-urlencoded payload
+            String formData = "username=" + URLEncoder.encode(nickname, "UTF-8") +
+                              "&password=" + URLEncoder.encode(password, "UTF-8");
+
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = formData.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = conn.getResponseCode();
+            System.out.println(responseCode);
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder responseBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBuilder.append(line);
+                }
+                reader.close();
+                
+                JsonReader jsonReader = Json.createReader(new StringReader(responseBuilder.toString()));
+                JsonObject jsonResponse = jsonReader.readObject();
+                String jsonToken = jsonResponse.getString("token");
+                
+                session.setAttribute("JTK", jsonToken);
+                conn.disconnect();
+                response.sendRedirect("home.jsp");
+                
+            } else {
+                session = request.getSession();
+                session.setAttribute("errorMessage", "Invalid username or password");
+                response.sendRedirect("login.jsp");
+              }
+        }
+        else {
             HttpSession session = request.getSession();
             session.setAttribute("errorMessage", "Invalid username or password");
             response.sendRedirect("login.jsp");

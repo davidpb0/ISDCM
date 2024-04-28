@@ -66,19 +66,34 @@ public class serverletRegistroVid extends HttpServlet {
             
             String uploadDirectory = "/home/alumne/WebAppVideos";
             String fileName = title + "_" + author + "." + format;
-            String filePath = uploadDirectory + File.separator + fileName;
-            
-            Video video = new Video(title, author, duration, description, format, filePath);
-            
+            String tempFilePath = uploadDirectory + File.separator + "temp_" + fileName;
+            String encryptedFilePath = uploadDirectory + File.separator + fileName;
+
+            // Save the uploaded file to a temporary location
             try (InputStream fileContent = filePart.getInputStream()) {
-                Files.copy(fileContent, Paths.get(filePath));
+                Files.copy(fileContent, Paths.get(tempFilePath));
             } catch (IOException e) {
-                session.setAttribute("errorMessage", "The video with that title already exist!");
+                session.setAttribute("errorMessage", "Failed to save the video");
                 response.sendRedirect("registroVid.jsp");
-                System.out.println(e);
                 return;
             }
 
+            // Encrypt the video file
+            String secretKey = "5Uo7r8YfGhJk2NmP";
+            try {
+                VideoEncryptionUtil.encryptVideo(tempFilePath, encryptedFilePath, secretKey);
+            } catch (Exception e) {
+                Files.deleteIfExists(Paths.get(tempFilePath));
+                session.setAttribute("errorMessage", "Failed to encrypt the video");
+                response.sendRedirect("registroVid.jsp");
+                return;
+            }
+            
+            Files.deleteIfExists(Paths.get(tempFilePath));
+
+            
+            Video video = new Video(title, author, duration, description, format, encryptedFilePath);
+            
             boolean saved = video.saveVideo();
 
             if (saved) {

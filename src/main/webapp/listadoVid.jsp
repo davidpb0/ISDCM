@@ -59,21 +59,19 @@
     <div class="swiper-container">
         <div class="swiper-wrapper">
             <% 
-            Map<String, SimpleEntry<Video, File>> videoFileMap = (Map<String, SimpleEntry<Video, File>>) request.getAttribute("videoMap");
+            Map<String, SimpleEntry<Video, String>> videoFileMap = (Map<String, SimpleEntry<Video, String>>) request.getAttribute("videoMap");
             if (videoFileMap != null && !videoFileMap.isEmpty()) {
-                for (Map.Entry<String, SimpleEntry<Video, File>> entry : videoFileMap.entrySet()) {
-                    SimpleEntry<Video, File> videoEntry = entry.getValue();
+                for (Map.Entry<String, SimpleEntry<Video, String>> entry : videoFileMap.entrySet()) {
+                    SimpleEntry<Video, String> videoEntry = entry.getValue();
                     Video videoMetadata = videoEntry.getKey();
-                    File videoFile = videoEntry.getValue();
+                    String base64Video = videoEntry.getValue();
                     try {
-                        byte[] videoBytes = Files.readAllBytes(videoFile.toPath());
-                        String base64Video = Base64.getEncoder().encodeToString(videoBytes);
             %>
                         <div class="swiper-slide">
                             <div style="margin: 10px;">
                                 <h3 style="margin: 0;"><%= videoMetadata.getTitle() %></h3>
                                 <p style="margin: 0;"><%= videoMetadata.getDescription() %></p>
-                                <video id ="<%= videoFile.getName() %>" class="video-container" controls>
+                                <video id ="<%= videoMetadata.getId() %>" class="video-container" controls>
                                     <source src="data:video/<%= videoMetadata.getFormat() %>;base64, <%= base64Video %>" type="video/<%= videoMetadata.getFormat() %>">
                                     Your browser does not support the video tag.
                                 </video>
@@ -83,7 +81,7 @@
                                 </div>
                             </div>
                              <script>
-                                var videoElement = document.getElementById("<%= videoFile.getName() %>");
+                                var videoElement = document.getElementById("<%= videoMetadata.getId() %>");
 
                                 videoElement.addEventListener('play', function() {
                                     event.preventDefault();

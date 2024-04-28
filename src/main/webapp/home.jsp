@@ -8,6 +8,7 @@
 <%
     // Check if user is logged in
     String user = (String) session.getAttribute("user");
+    String jtk = (String) session.getAttribute("JTK");
     if (user == null) {
         response.sendRedirect("login.jsp"); 
     }
@@ -127,6 +128,8 @@
 
         <div class="main-content">
             <h1>Welcome back <%= session.getAttribute("user") %> !</h1>
+            
+            <h3> Tu código: <%= session.getAttribute("JTK") %></h3>
             
             <% String successMessage = (String)request.getAttribute("successMessage");
                if (successMessage != null && !successMessage.isEmpty()) { %>

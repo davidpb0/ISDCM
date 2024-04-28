@@ -203,7 +203,8 @@ public class Video {
                             resultSet.getString("description" ),
                             resultSet.getString("format"),
                             resultSet.getString("videoPath"),
-                            resultSet.getInt("reproductions")
+                            resultSet.getInt("reproductions"),
+                            resultSet.getInt("id")
                             
                     );
                     videoList.add(video);
